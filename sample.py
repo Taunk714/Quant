@@ -1,12 +1,13 @@
 def init(context):
     #配置策略参数
-    context.future_list = ['CU','M']  #回测品种
+    context.future_list = ['CU','M']   #回测品种
     context.target_nums = 3            #回测单开仓手数
     context.K1=0.5                     #回测参数K1——决定上界的参数
     context.K2=0.5                     #回测参数K2——决定下界的参数
-    context.fired = False
+    context.fired = False              #是否发送order
     
     # 初始化时订阅合约行情。订阅之后的合约行情会在handle_bar中进行更新。
+    # 单一期货策略必须订阅有效期货合约
     subscribe_all(context)
     
 
@@ -18,8 +19,8 @@ def before_trading(context):
     
 # 你选择的期货数据更新将会触发此段逻辑，例如日线或分钟线更新
 def handle_bar(context, bar_dict):
-    K1 = context.K1
-    K2 = context.K2
+    K1 = context.K1    #决定上届的参数
+    K2 = context.K2    #决定下届的参数
     #每天记录一次开盘价
     if context.fired == True:
         context.openprice_dict ={}
