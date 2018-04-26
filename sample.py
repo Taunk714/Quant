@@ -23,8 +23,8 @@ def handle_bar(context, bar_dict):
     K2 = context.K2    #决定下届的参数
     #每天记录一次开盘价
     if context.fired == True:
-        context.openprice_dict ={}
-        for future in context.target_list:
+        context.openprice_dict ={}  #命名参数，开盘价
+        for future in context.target_list:  #对回测品种中的期货进行循环操作
             context.openprice_dict[future]=bar_dict[future].open
         context.fired = False
     #主力换月
