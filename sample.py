@@ -27,11 +27,11 @@ def handle_bar(context, bar_dict):
         for future in context.target_list:  #对回测品种中的期货进行循环操作
             context.openprice_dict[future]=bar_dict[future].open
         context.fired = False
-    #主力换月
+    #主力换月，自行定义
     change_dominate_future(context)
     #换月完成之后、现持仓与目标持仓标的一致
-    for i in context.target_list:
-        range = cal_range(i,4)
+    for i in context.target_list:    #对目标池里的每一项进行测试
+        range = cal_range(i,4)  #自己定义的函数
         open_price = context.openprice_dict[i]
         current_price = bar_dict[i].close
         buy_line = open_price+K1*range
