@@ -14,7 +14,7 @@ def init(context):
 # before_trading此函数会在每天策略交易开始前被调用，当天只会被调用一次
 def before_trading(context):
     context.fired = True
-    subscribe_all(context)
+    subscribe_all(context)  #订阅行情
     
     
 # 你选择的期货数据更新将会触发此段逻辑，例如日线或分钟线更新
@@ -25,18 +25,18 @@ def handle_bar(context, bar_dict):
     if context.fired == True:
         context.openprice_dict ={}  #命名参数，开盘价
         for future in context.target_list:  #对回测品种中的期货进行循环操作
-            context.openprice_dict[future]=bar_dict[future].open
+            context.openprice_dict[future]=bar_dict[future].open  #为什么需要这一步？下一个循环中不是有吗
         context.fired = False
     #主力换月，自行定义
     change_dominate_future(context)
     #换月完成之后、现持仓与目标持仓标的一致
     for i in context.target_list:    #对目标池里的每一项进行测试
         range = cal_range(i,4)  #自己定义的函数
-        open_price = context.openprice_dict[i]
-        current_price = bar_dict[i].close
+        open_price = context.openprice_dict[i]  #开盘价
+        current_price = bar_dict[i].close  #收盘价
         buy_line = open_price+K1*range
         sell_line = open_price-K2*range
-        position = get_position(i,context)
+        position = get_position(i,context)  #持仓仓位以及持仓情况
         
         if len(context.future_account.positions.keys())>0:
             try:
@@ -58,23 +58,24 @@ def handle_bar(context, bar_dict):
 #计算Range    
 def cal_range(stock,N):
     
-    High = history_bars(stock,N,'1d','high')
-    Low = history_bars(stock,N,'1d','low')
-    Open = history_bars(stock,N,'1d','open')
-    Close = history_bars(stock,N,'1d','close')
-    
-    HH = max(High[:-1])
-    LL = min(Low[:-1])
-    LC = min(Close[:-1])
-    HC = max(Close[:-1])
-    
-    range = max((HH-LC),(HC-LL))
+    High = history_bars(stock,N,'1d','high')  #stock数据，4天，以日为单位，最高价
+    Low = history_bars(stock,N,'1d','low')  #最低价
+    Open = history_bars(stock,N,'1d','open')  #开盘价
+    Close = history_bars(stock,N,'1d','close')  #收盘价
 
+    #删除倒数第一个（删除最后一天的数据）
+    HH = max(High[:-1])  #四天的最高价
+    LL = min(Low[:-1])  #四天的最低价
+    LC = min(Close[:-1])  #四天的最低收盘价
+    HC = max(Close[:-1])  #四天的最高收盘价
+    
+    range = max((HH-LC),(HC-LL))  #四天的最高价-最低收盘价，最高收盘价-最低价
+#四天的最高价
     return range
 
 #主力换月
 def change_dominate_future(context):
-    for future in list(context.future_account.positions.keys()):
+    for future in list(context.future_account.positions.keys()):  #keys是dict的函数，此处是期货名
         future_sige = future[:-4]
         new_dominate_future = get_dominant_future(future_sige)
         if future == new_dominate_future:
@@ -95,22 +96,22 @@ def change_dominate_future(context):
 
 #单品种持仓状况    
 def get_position(future,context):
-    position = context.future_account.positions[future]
+    position = context.future_account.positions[future]  #仓位情况
     
-    if len(context.future_account.positions.keys())>0:
+    if len(context.future_account.positions.keys())>0:  #？
         
-        position_side ='SELL' if position.sell_quantity>0 else 'BUY'
+        position_side ='SELL' if position.sell_quantity>0 else 'BUY'  #如果空头持仓>0，卖出，否则买入
         position_quantity = position.sell_quantity if position_side == 'SELL' else position.buy_quantity
         
-        return {'side':position_side,'quantity':position_quantity}
+        return {'side':position_side,'quantity':position_quantity}  #side:买卖仓位 quantity:持仓数量
         
     else:
         return {}
 
 #订阅行情
-def subscribe_all(context):
-    context.target_list = [get_dominant_future(i) for i in context.future_list]
-    print(context.target_list)
-    for future in context.target_list:
-        print(future)
-        subscribe(future)
+def subscribe_all(context):  #订阅所有行情
+    context.target_list = [get_dominant_future(i) for i in context.future_list]  #获取主力合约代码
+    print(context.target_list)  #打印主力合约代码
+    for future in context.target_list:  
+        print(future)  #打印每一个代码
+        subscribe(future)  #订阅的行情数据
