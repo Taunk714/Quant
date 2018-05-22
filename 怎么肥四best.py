@@ -19,7 +19,8 @@ def init(context):
     context.sign2 = 0
     context.flag1 = False #记录是否发生虚拟交易
     context.flag2 = False
-    context.qty = True
+    context.days_yesterday = 0
+    context.dayb_yesterday = 0
 '''
 ---------------------------------------------------------------------------
         每日开盘前
@@ -33,9 +34,8 @@ def before_trading(context):
         # 如果更新了，设置main_changed这个flag为True
         context.main_changed = True
 
-    context.days = context.portfolio.positions[context.s1].sell_quantity
-    context.dayb = context.portfolio.positions[context.s1].buy_quantity
-
+    context.days_today = context.portfolio.positions[context.s1].sell_quantity
+    context.dayb_today = context.portfolio.positions[context.s1].buy_quantity
         
 
 
@@ -71,8 +71,9 @@ def handle_bar(context, bar_dict):
 # 2. 根据开盘前计算得到指标，判断是否发出信号
     sell_qty = context.portfolio.positions[context.s1].sell_quantity
     buy_qty = context.portfolio.positions[context.s1].buy_quantity
-    ds1 = context.days
-    db1 = context.dayb
+    ds1 = context.days_today
+    db1 = context.dayb_today
+
     op0 = bar_dict[context.s1].open
     cl0 = bar_dict[context.s1].close
     cl = history_bars(context.s1,3,'1d','close')
@@ -111,8 +112,14 @@ def handle_bar(context, bar_dict):
             buy_close(context.s1,25,price = bar_dict[context.s1].close)
 #-------------------开仓-------------------------------------
     #多头开仓
-    if a1 < a2 and a2 < a3 and cl0 > context.AvgMa5[-1] and sell_qty == 0 and buy_qty == 0 and db1 ==0 and ds1 ==0:
-        buy_open(context.s1,25,price = bar_dict[context.s1].close)    
-    if a1 > a2 and a2 > a3 and cl0 < context.AvgMa5[-1] and sell_qty == 0 and buy_qty == 0 and db1 == 0 and ds1 == 0:
-        sell_open(context.s1,25,price = bar_dict[context.s1].close)    
+    if a1 < a2 and a2 < a3 and cl0 > context.AvgMa5[-1] and sell_qty == 0 and buy_qty == 0 and db1 == 0 and ds1 == 0 :
+        if context.days_yesterday == 0:
+            buy_open(context.s1,25,price = bar_dict[context.s1].close)    
+    if a1 > a2 and a2 > a3 and cl0 < context.AvgMa5[-1] and sell_qty == 0 and buy_qty == 0 and db1 == 0 and ds1 == 0 :
+        if context.dayb_yesterday == 0:
+            sell_open(context.s1,25,price = bar_dict[context.s1].close)
+
+def after_trading(context):
+    context.days_yesterday = context.days_today
+    context.dayb_yesterday = context.dayb_today
 
