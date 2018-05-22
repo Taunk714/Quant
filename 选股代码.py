@@ -8,7 +8,7 @@ import rqdatac
 
 def init(context):
     context.flag = 0
-    scheduler.run_monthly(rebalance,8)
+    scheduler.run_monthly(rebalance,8) 
 
 def handle_bar(context,bar_dict):
     if not context.flag:
