@@ -2,7 +2,7 @@ start = '2009-03-01'                       # 回测起始时间
 end = '2016-10-12'                         # 回测结束时间
 
 benchmark = 'ZZ500'                        # 策略参考标准
-universe = set_universe('A')               # 证券池，支持股票和基金
+universe = set_universe('A')               # 静态股票池，全A股
 capital_base = 10000000                    # 起始资金
 freq = 'd'                                 # 策略类型，'d'表示日间策略使用日线回测
 refresh_rate = 10                           # 调仓频率，表示执行handle_data的时间间隔
