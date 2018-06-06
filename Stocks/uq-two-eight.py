@@ -10,7 +10,7 @@ universe = ['510300.XSHG',   # 300 ETF 代替沪深300指数
                    '511880.XSHG']   # 银华日利
 capital_base = 10000
 refresh_rate = 1
-commission = Commission(0.0, 0.0)
+commission = Commission(0.0, 0.0)  #手续费
 
 def initialize(account):
     pass
